@@ -1,0 +1,95 @@
+"use client";
+import { useDrafts } from "@/hooks/useDrafts";
+import { useGitHubFiles } from "@/hooks/useGitHubFiles";
+import { publishAllDrafts } from "@/lib/api";
+import { useEffect, useState } from "react";
+
+import { DraftForm } from "./DraftForm";
+import { GitHubDraftsViewer } from "./GitHubDraftsViewer";
+import { LocalDraftsList } from "./LocalDraftsList";
+
+export function PublisherClient({ initialFiles }) {
+  const [editingDraftId, setEditingDraftId] = useState(null);
+  const [isPublishing, setIsPublishing] = useState(false);
+
+  const {
+    files,
+    loading: githubLoading,
+    refetch,
+  } = useGitHubFiles("drafts", initialFiles);
+  const { drafts, addDraft, updateDraft, deleteDraft, clearAllDrafts } =
+    useDrafts();
+
+  const editingDraft = drafts.find((d) => d.id === editingDraftId) || null;
+
+  const handleUpdateDraft = (id, title, body) => {
+    updateDraft(id, title, body);
+    setEditingDraftId(null);
+  };
+
+  const handleCancelEdit = () => setEditingDraftId(null);
+
+  const handlePublish = async () => {
+    if (drafts.length === 0) return alert("No drafts to publish!");
+    if (!confirm(`Are you sure you want to publish ${drafts.length} draft(s)?`))
+      return;
+
+    setIsPublishing(true);
+    try {
+      const data = await publishAllDrafts(drafts);
+      if (data.success) {
+        alert("Drafts published successfully!");
+        clearAllDrafts();
+      } else {
+        alert("Failed to publish drafts. Check console.");
+        console.error("Publishing error:", data.message);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error publishing drafts. See console for details.");
+    } finally {
+      setIsPublishing(false);
+    }
+  };
+
+  // Delete first/top draft on keyboard Delete key
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Delete" && drafts.length > 0) {
+        deleteDraft(drafts[0].id);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [drafts, deleteDraft]);
+
+  return (
+    <main className="container mx-auto px-4 py-8 min-h-screen grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
+      {/* Left Column */}
+      <div className="flex flex-col h-full">
+        <GitHubDraftsViewer
+          files={files}
+          loading={githubLoading}
+          onRefresh={refetch}
+        />
+      </div>
+
+      {/* Right Column */}
+      <div className="flex flex-col gap-6 h-full">
+        <DraftForm
+          editingDraft={editingDraft}
+          onAdd={addDraft}
+          onUpdate={handleUpdateDraft}
+          onCancel={handleCancelEdit}
+        />
+        <LocalDraftsList
+          drafts={drafts}
+          onEdit={setEditingDraftId}
+          onDelete={deleteDraft}
+          onPublish={handlePublish}
+          isPublishing={isPublishing}
+        />
+      </div>
+    </main>
+  );
+}
