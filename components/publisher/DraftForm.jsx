@@ -46,10 +46,10 @@ export function DraftForm({ editingDraft, onAdd, onUpdate, onCancelEdit }) {
   };
 
   const inputStyle =
-    "bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800";
+    "bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800";
 
   return (
-    <Card className="shadow-sm">
+    <Card className="shadow-sm border border-gray-200 dark:border-gray-700">
       <CardHeader>
         <CardTitle className="text-xl font-semibold">
           {isEditing ? "Edit Draft" : "Create New Draft"}

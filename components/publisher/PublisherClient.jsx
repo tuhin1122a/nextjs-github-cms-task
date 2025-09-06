@@ -75,7 +75,7 @@ export function PublisherClient({ initialFiles }) {
       </div>
 
       {/* Right Column */}
-      <div className="flex flex-col gap-6 h-full">
+      <div className="flex flex-col gap-6 h-full bg-blue-50 dark:bg-gray-900/40 border border-blue-100 dark:border-gray-700 rounded-xl p-6 shadow-md">
         <DraftForm
           editingDraft={editingDraft}
           onAdd={addDraft}

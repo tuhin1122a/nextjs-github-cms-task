@@ -21,7 +21,7 @@ export function GitHubDraftsViewer({ files, loading, onRefresh }) {
     colors[Math.floor(Math.random() * colors.length)];
 
   return (
-    <Card className="bg-gray-100 shadow-sm border border-gray-200 dark:border-gray-800 h-screen flex flex-col">
+    <Card className="bg-blue-50 dark:bg-gray-900/40 shadow-md border border-blue-100 dark:border-gray-700 h-screen flex flex-col">
       {/* Header */}
       <CardHeader className="flex flex-row justify-between items-center pb-4">
         <CardTitle className="text-xl font-semibold">
