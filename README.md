@@ -4,8 +4,8 @@ A modern content management system built with Next.js that integrates with GitHu
 
 ## 🚀 Live Demo
 
-- **Live Site:** [Deploy to Vercel](https://vercel.com/new/clone?repository-url=https://github.com/your-username/github-cms-nextjs)
-- **Repository:** [GitHub Repo](https://github.com/your-username/github-cms-nextjs)
+- **Live Site:** [Deploy to Vercel]([https://vercel.com/new/clone?repository-url=https://github.com/your-username/github-cms-nextjs](https://nextjs-github-cms-task.vercel.app/))
+- **Repository:** [GitHub Repo]([https://github.com/your-username/github-cms-nextjs](https://github.com/tuhin1122a/nextjs-github-cms-task))
 
 ## ✨ Features
 
