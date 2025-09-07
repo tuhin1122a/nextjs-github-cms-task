@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { colors } from "@/lib/utils";
 import { Edit, Trash2 } from "lucide-react";
 
 export function LocalDraftsList({
@@ -11,14 +12,6 @@ export function LocalDraftsList({
   onPublish,
   isPublishing,
 }) {
-  const colors = [
-    "bg-slate-50 border-slate-200",
-    "bg-emerald-50 border-emerald-200",
-    "bg-blue-50 border-blue-200",
-    "bg-amber-50 border-amber-200",
-    "bg-violet-50 border-violet-200",
-  ];
-
   const getRandomColor = () =>
     colors[Math.floor(Math.random() * colors.length)];
 
