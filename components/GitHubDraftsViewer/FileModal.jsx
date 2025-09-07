@@ -7,31 +7,52 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { marked } from "marked";
+import Prism from "prismjs";
+import "prismjs/components/prism-css";
+import "prismjs/components/prism-html";
+import "prismjs/components/prism-javascript";
+import "prismjs/components/prism-json";
+import "prismjs/themes/prism.css"; // Light GitHub-style theme
+import { useEffect } from "react";
 
 export function FileModal({ file, isOpen, onClose }) {
+  useEffect(() => {
+    Prism.highlightAll();
+  }, [file]);
+
+  const renderer = new marked.Renderer();
+
+  // Code block rendering with Prism highlighting
+  renderer.code = (code, language) => {
+    const validLang = Prism.languages[language] || Prism.languages.markup;
+    const highlighted = Prism.highlight(code, validLang, language);
+    return `<pre class="rounded-md bg-gray-100 p-4 overflow-x-auto"><code class="language-${language}">${highlighted}</code></pre>`;
+  };
+
+  const htmlContent = file?.content
+    ? marked(file.content, { renderer })
+    : "<em class='text-gray-500'>No content available</em>";
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-auto bg-slate-50 border-slate-200">
-        <DialogHeader className="border-b border-slate-200 pb-4">
-          <DialogTitle className="text-xl font-semibold text-slate-900">
+      <DialogContent className="max-w-4xl max-h-[80vh] overflow-auto bg-white border border-gray-300">
+        <DialogHeader className="border-b border-gray-300 pb-4">
+          <DialogTitle className="text-xl font-semibold text-gray-900">
             {file?.name || "File Content"}
           </DialogTitle>
         </DialogHeader>
-        <div className="mt-6 p-4 bg-white rounded-lg border border-slate-200">
+
+        <div className="mt-6 p-4 bg-white rounded-lg border border-gray-300">
           <div
-            className="prose max-w-none prose-slate 
-                       prose-headings:text-slate-900 
-                       prose-p:text-slate-700 
-                       prose-strong:text-slate-900 
-                       prose-code:text-emerald-700 
-                       prose-code:bg-emerald-50 
-                       prose-pre:bg-slate-900 
-                       prose-pre:text-slate-100"
-            dangerouslySetInnerHTML={{
-              __html: file?.content
-                ? marked(file.content)
-                : "<em class='text-slate-500'>No content available</em>",
-            }}
+            className="prose max-w-none
+                       prose-headings:text-gray-900
+                       prose-p:text-gray-800
+                       prose-strong:text-gray-900
+                       prose-code:text-gray-800
+                       prose-pre:text-gray-800
+                       prose-pre:bg-gray-100
+                       overflow-x-auto"
+            dangerouslySetInnerHTML={{ __html: htmlContent }}
           />
         </div>
       </DialogContent>
