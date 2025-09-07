@@ -12,23 +12,50 @@ import Prism from "prismjs";
 import "prismjs/components/prism-css";
 import "prismjs/components/prism-javascript";
 import "prismjs/components/prism-json";
-import "prismjs/components/prism-markup"; // ✅ HTML এর জন্য
-import "prismjs/themes/prism.css"; // light theme
-import { useEffect } from "react";
+import "prismjs/components/prism-markup"; // HTML
+import "prismjs/themes/prism.css"; // Light GitHub-style theme
+import { useEffect, useRef } from "react";
 
 export function FileModal({ file, isOpen, onClose }) {
+  const contentRef = useRef(null);
+
   useEffect(() => {
-    Prism.highlightAll();
+    if (contentRef.current) {
+      const codeBlocks = contentRef.current.querySelectorAll("pre code");
+      codeBlocks.forEach((block) => Prism.highlightElement(block));
+    }
   }, [file]);
 
   const renderer = new marked.Renderer();
 
   renderer.code = (code, language) => {
+    let codeString = "";
+
+    // Handle object (from parsed Markdown AST)
+    if (typeof code === "object" && code !== null) {
+      if ("text" in code) {
+        codeString = code.text;
+      } else if ("raw" in code) {
+        codeString = code.raw;
+      } else {
+        codeString = JSON.stringify(code, null, 2);
+      }
+    } else {
+      // Handle string normally
+      codeString = String(code || "");
+    }
+
     const lang =
       typeof language === "string" && Prism.languages[language]
         ? language
         : "markup";
-    const highlighted = Prism.highlight(code, Prism.languages[lang], lang);
+
+    const highlighted = Prism.highlight(
+      codeString,
+      Prism.languages[lang],
+      lang
+    );
+
     return `<pre class="rounded-md bg-gray-100 p-4 overflow-x-auto">
               <code class="language-${lang}">${highlighted}</code>
             </pre>`;
@@ -40,10 +67,7 @@ export function FileModal({ file, isOpen, onClose }) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent
-        aria-describedby={undefined} // ✅ warning fix
-        className="max-w-4xl max-h-[80vh] overflow-auto bg-white border border-gray-300"
-      >
+      <DialogContent className="max-w-4xl max-h-[80vh] overflow-auto bg-white border border-gray-300">
         <DialogHeader className="border-b border-gray-300 pb-4">
           <DialogTitle className="text-xl font-semibold text-gray-900">
             {file?.name || "File Content"}
@@ -53,18 +77,17 @@ export function FileModal({ file, isOpen, onClose }) {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="mt-6 p-4 bg-white rounded-lg border border-gray-300">
-          <div
-            className="prose max-w-none
-                       prose-headings:text-gray-900
-                       prose-p:text-gray-800
-                       prose-strong:text-gray-900
-                       prose-code:text-gray-800
-                       prose-pre:bg-gray-100
-                       overflow-x-auto"
-            dangerouslySetInnerHTML={{ __html: htmlContent }}
-          />
-        </div>
+        <div
+          ref={contentRef}
+          className="mt-6 p-4 bg-white rounded-lg border border-gray-300 prose max-w-none
+                     prose-headings:text-gray-900
+                     prose-p:text-gray-800
+                     prose-strong:text-gray-900
+                     prose-code:text-pink-600
+                     prose-pre:bg-gray-100
+                     overflow-x-auto"
+          dangerouslySetInnerHTML={{ __html: htmlContent }}
+        />
       </DialogContent>
     </Dialog>
   );
