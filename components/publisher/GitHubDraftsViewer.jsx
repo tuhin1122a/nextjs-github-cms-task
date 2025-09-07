@@ -8,7 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Eye, RefreshCw } from "lucide-react";
+import { Eye } from "lucide-react";
 import { marked } from "marked";
 import { useState } from "react";
 
@@ -77,8 +77,7 @@ export function GitHubDraftsViewer({ files, loading, onRefresh, onDraftDrop }) {
       <CardHeader className="flex flex-row justify-between items-center pb-4">
         <div>
           <CardTitle className="text-xl font-semibold text-slate-800">
-            GitHub Drafts - Latest 5 ({Array.isArray(files) ? files.length : 0}{" "}
-            total)
+            GitHub Drafts- ({Array.isArray(files) ? files.length : 0} total)
           </CardTitle>
           <p className="text-sm text-slate-600 mt-1">
             {isDragOver
@@ -86,16 +85,6 @@ export function GitHubDraftsViewer({ files, loading, onRefresh, onDraftDrop }) {
               : "Drop zone for publishing drafts"}
           </p>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onRefresh}
-          disabled={loading}
-          className="border-slate-300 hover:bg-slate-50 bg-transparent"
-        >
-          <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-          <span className="ml-2">Refresh</span>
-        </Button>
       </CardHeader>
 
       {/* Scrollable Card Content */}
@@ -109,7 +98,14 @@ export function GitHubDraftsViewer({ files, loading, onRefresh, onDraftDrop }) {
         )}
 
         {loading ? (
-          <p className="text-slate-600">Loading files...</p>
+          <div className="space-y-4">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div
+                key={i}
+                className="h-16 bg-slate-200 rounded-lg animate-pulse"
+              />
+            ))}
+          </div>
         ) : !Array.isArray(files) || files.length === 0 ? (
           <p className="text-slate-600">
             No markdown files found in the GitHub repository.
@@ -138,6 +134,7 @@ export function GitHubDraftsViewer({ files, loading, onRefresh, onDraftDrop }) {
         )}
       </CardContent>
 
+      {/* File Modal */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-auto bg-slate-50 border-slate-200">
           <DialogHeader className="border-b border-slate-200 pb-4">

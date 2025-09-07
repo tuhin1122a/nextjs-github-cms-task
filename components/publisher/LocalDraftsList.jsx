@@ -1,4 +1,5 @@
 "use client";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Edit, Trash2 } from "lucide-react";
@@ -18,21 +19,21 @@ export function LocalDraftsList({
     "bg-violet-50 border-violet-200",
   ];
 
-  const getRandomColor = () => {
-    const randomIndex = Math.floor(Math.random() * colors.length);
-    return colors[randomIndex];
-  };
+  const getRandomColor = () =>
+    colors[Math.floor(Math.random() * colors.length)];
 
   const handleDragStart = (e, draft) => {
     e.dataTransfer.setData("application/json", JSON.stringify(draft));
     e.dataTransfer.effectAllowed = "move";
-
-    // Add visual feedback
     e.target.style.opacity = "0.5";
   };
 
   const handleDragEnd = (e) => {
     e.target.style.opacity = "1";
+  };
+
+  const handleDeleteClick = (id) => {
+    onDelete(id);
   };
 
   return (
@@ -53,7 +54,7 @@ export function LocalDraftsList({
             drafts.map((d) => (
               <div
                 key={d.id}
-                draggable={true}
+                draggable
                 onDragStart={(e) => handleDragStart(e, d)}
                 onDragEnd={handleDragEnd}
                 className={`rounded-lg p-4 flex justify-between items-start gap-2 shadow-sm cursor-move transition-opacity ${getRandomColor()}`}
@@ -99,7 +100,7 @@ export function LocalDraftsList({
                   <Button
                     variant="destructive"
                     size="icon"
-                    onClick={() => onDelete(d.id)}
+                    onClick={() => handleDeleteClick(d.id)}
                     className="h-8 w-8"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -109,6 +110,7 @@ export function LocalDraftsList({
             ))
           )}
         </div>
+
         {drafts.length > 0 && (
           <Button
             onClick={onPublish}
