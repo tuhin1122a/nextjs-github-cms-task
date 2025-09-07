@@ -1,23 +1,21 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { colors } from "@/lib/utils";
 import { useState } from "react";
 import { DraftCard } from "../GitHubDraftsViewer/DraftCard";
 import { FileModal } from "../GitHubDraftsViewer/FileModal";
 import { Loader } from "../GitHubDraftsViewer/Loader";
 
-export function GitHubDraftsViewer({ files, loading, onDraftDrop }) {
+export function GitHubDraftsViewer({
+  files = [],
+  loading = false,
+  onDraftDrop,
+  errorMessage,
+}) {
   const [selectedFile, setSelectedFile] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
-
-  const colors = [
-    "bg-slate-50 border-slate-200",
-    "bg-emerald-50 border-emerald-200",
-    "bg-blue-50 border-blue-200",
-    "bg-amber-50 border-amber-200",
-    "bg-violet-50 border-violet-200",
-  ];
 
   const getRandomColor = () =>
     colors[Math.floor(Math.random() * colors.length)];
@@ -80,6 +78,12 @@ export function GitHubDraftsViewer({ files, loading, onDraftDrop }) {
 
       {/* Scrollable Content */}
       <CardContent className="space-y-4 overflow-auto flex-1">
+        {errorMessage && (
+          <div className="p-4 bg-red-100 text-red-800 rounded-md mb-4">
+            {errorMessage}
+          </div>
+        )}
+
         {isDragOver && (
           <div className="border-2 border-dashed border-emerald-400 bg-emerald-100 rounded-lg p-8 text-center">
             <p className="text-emerald-700 font-medium">
