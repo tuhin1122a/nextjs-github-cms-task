@@ -153,18 +153,18 @@ export function PublisherClient({ initialFiles }) {
   return (
     <>
       <main className="container mx-auto px-4 py-8 min-h-screen grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
-        {/* Left Column */}
-        <div className="flex flex-col h-full">
+        {/* Left Column (Desktop: GitHubDraftsViewer, Mobile: DraftForm first) */}
+        <div className="flex flex-col h-full order-2 lg:order-1">
           <GitHubDraftsViewer
             files={files}
             loading={githubLoading}
             onRefresh={refetch}
-            onDraftDrop={handlePublishDraft} // drag-drop publish
+            onDraftDrop={handlePublishDraft}
           />
         </div>
 
-        {/* Right Column */}
-        <div className="flex flex-col gap-6 h-full bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+        {/* Right Column (Desktop: DraftForm + LocalDraftsList, Mobile: Form first) */}
+        <div className="flex flex-col gap-6 h-full bg-white border border-slate-200 rounded-xl p-6 shadow-sm order-1 lg:order-2">
           <DraftForm
             editingDraft={editingDraft}
             onAdd={addDraft}
