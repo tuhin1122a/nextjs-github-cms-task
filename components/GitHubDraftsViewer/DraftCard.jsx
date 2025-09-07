@@ -6,7 +6,9 @@ import { Eye } from "lucide-react";
 
 export function DraftCard({ file, onView, getColor }) {
   return (
-    <Card className={`${getColor()} rounded-lg shadow-sm`}>
+    <Card
+      className={`${getColor()} rounded-lg shadow-sm border-none cursor-pointer hover:shadow-md transition-shadow`}
+    >
       <CardHeader className="flex flex-row justify-between items-center">
         <CardTitle className="text-lg font-semibold text-slate-800">
           {file.name}
