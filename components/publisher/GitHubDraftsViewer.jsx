@@ -49,7 +49,11 @@ export function GitHubDraftsViewer({
     }
   };
 
-  const latestFiles = Array.isArray(files) ? files.slice(0, 5) : [];
+  // Display all files except the last one
+  const displayedFiles =
+    Array.isArray(files) && files.length > 1
+      ? files.slice(0, files.length - 1)
+      : [];
 
   return (
     <Card
@@ -66,7 +70,7 @@ export function GitHubDraftsViewer({
       <CardHeader className="flex flex-row justify-between items-center pb-4">
         <div>
           <CardTitle className="text-xl font-semibold text-slate-800">
-            GitHub Drafts- ({Array.isArray(files) ? files.length : 0} total)
+            GitHub Drafts ({Array.isArray(files) ? files.length : 0} total)
           </CardTitle>
           <p className="text-sm text-slate-600 mt-1">
             {isDragOver
@@ -78,12 +82,14 @@ export function GitHubDraftsViewer({
 
       {/* Scrollable Content */}
       <CardContent className="space-y-4 overflow-auto flex-1">
+        {/* Error Message */}
         {errorMessage && (
           <div className="p-4 bg-red-100 text-red-800 rounded-md mb-4">
             {errorMessage}
           </div>
         )}
 
+        {/* Drag Over Indicator */}
         {isDragOver && (
           <div className="border-2 border-dashed border-emerald-400 bg-emerald-100 rounded-lg p-8 text-center">
             <p className="text-emerald-700 font-medium">
@@ -92,14 +98,15 @@ export function GitHubDraftsViewer({
           </div>
         )}
 
+        {/* Loader */}
         {loading ? (
           <Loader />
-        ) : !latestFiles.length ? (
+        ) : !displayedFiles.length ? (
           <p className="text-slate-600">
             No markdown files found in the GitHub repository.
           </p>
         ) : (
-          latestFiles.map((file) => (
+          displayedFiles.map((file) => (
             <DraftCard
               key={file.name}
               file={file}
