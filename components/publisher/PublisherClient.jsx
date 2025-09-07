@@ -4,7 +4,6 @@ import { useDrafts } from "@/hooks/useDrafts";
 import { useGitHubFiles } from "@/hooks/useGitHubFiles";
 import { publishAllDrafts, publishSingleDraft } from "@/lib/api";
 import { useEffect, useState } from "react";
-
 import { toast } from "sonner";
 import { PublishConfirmModal } from "../PublishConfirmModal";
 import { DraftForm } from "./DraftForm";
@@ -12,6 +11,7 @@ import { GitHubDraftsViewer } from "./GitHubDraftsViewer";
 import { LocalDraftsList } from "./LocalDraftsList";
 
 export function PublisherClient({ initialFiles }) {
+  const [mounted, setMounted] = useState(false);
   const [editingDraftId, setEditingDraftId] = useState(null);
   const [isPublishing, setIsPublishing] = useState(false);
   const [confirmModal, setConfirmModal] = useState({
@@ -21,42 +21,57 @@ export function PublisherClient({ initialFiles }) {
     message: "",
   });
 
+  const { drafts, addDraft, updateDraft, deleteDraft, clearAllDrafts } =
+    useDrafts();
   const {
     files,
     loading: githubLoading,
     refetch,
   } = useGitHubFiles("drafts", initialFiles);
-  const { drafts, addDraft, updateDraft, deleteDraft, clearAllDrafts } =
-    useDrafts();
 
   const editingDraft = drafts.find((d) => d.id === editingDraftId) || null;
 
-  // =========================
+  // Mounted for hydration safety
+  useEffect(() => setMounted(true), []);
+
+  // Delete with Delete key
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Delete" && drafts.length > 0 && !editingDraftId) {
+        const draft = drafts[0];
+        openConfirmModal({
+          message: `Delete "${draft.title}"?`,
+          draft,
+          action: async (d) => {
+            deleteDraft(d.id);
+            toast.success(`"${d.title}" deleted successfully!`);
+          },
+        });
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [drafts, deleteDraft, editingDraftId]);
+
   // Handlers
-  // =========================
   const handleUpdateDraft = (id, title, body) => {
     updateDraft(id, title, body);
     setEditingDraftId(null);
+    toast.success("Draft updated successfully!");
   };
+
   const handleCancelEdit = () => setEditingDraftId(null);
 
-  // Open confirm modal
   const openConfirmModal = ({ message, action, draft = null }) => {
     setConfirmModal({ open: true, message, action, draft });
   };
 
-  // Execute confirm action
   const handleConfirm = async () => {
     if (!confirmModal.action) return;
     setConfirmModal({ ...confirmModal, open: false });
     await confirmModal.action(confirmModal.draft);
   };
 
-  // =========================
-  // Publish / Delete Handlers
-  // =========================
-
-  // Publish all drafts
   const handlePublishAll = () => {
     if (drafts.length === 0) {
       toast.error("No drafts to publish!");
@@ -87,7 +102,6 @@ export function PublisherClient({ initialFiles }) {
     });
   };
 
-  // Single draft publish (drag-drop)
   const handlePublishDraft = (draft) => {
     openConfirmModal({
       message: `Publish "${draft.title}"?`,
@@ -113,7 +127,6 @@ export function PublisherClient({ initialFiles }) {
     });
   };
 
-  // Delete draft with modal
   const handleDeleteDraft = (id) => {
     const draft = drafts.find((d) => d.id === id);
     if (!draft) return;
@@ -128,32 +141,12 @@ export function PublisherClient({ initialFiles }) {
     });
   };
 
-  // Delete first/top draft with Delete key
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === "Delete" && drafts.length > 0) {
-        const draft = drafts[0];
-        openConfirmModal({
-          message: `Delete "${draft.title}"?`,
-          draft,
-          action: async (d) => {
-            deleteDraft(d.id);
-            toast.success(`"${d.title}" deleted successfully!`);
-          },
-        });
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [drafts, deleteDraft]);
+  if (!mounted) return null;
 
-  // =========================
-  // JSX
-  // =========================
   return (
     <>
       <main className="container mx-auto px-4 py-8 min-h-screen grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
-        {/* Left Column (Desktop: GitHubDraftsViewer, Mobile: DraftForm first) */}
+        {/* Left */}
         <div className="flex flex-col h-full order-2 lg:order-1">
           <GitHubDraftsViewer
             files={files}
@@ -163,26 +156,31 @@ export function PublisherClient({ initialFiles }) {
           />
         </div>
 
-        {/* Right Column (Desktop: DraftForm + LocalDraftsList, Mobile: Form first) */}
+        {/* Right */}
         <div className="flex flex-col gap-6 h-full bg-white border border-slate-200 rounded-xl p-6 shadow-sm order-1 lg:order-2">
           <DraftForm
             editingDraft={editingDraft}
             onAdd={addDraft}
             onUpdate={handleUpdateDraft}
-            onCancel={handleCancelEdit}
+            onCancelEdit={handleCancelEdit}
           />
           <LocalDraftsList
             drafts={drafts}
-            onEdit={setEditingDraftId}
+            onEdit={(id) => {
+              if (!editingDraftId) setEditingDraftId(id);
+              else if (editingDraftId !== id)
+                toast.info("Finish editing the current draft first!");
+            }}
             onDelete={handleDeleteDraft}
             onPublish={handlePublishAll}
             isPublishing={isPublishing}
+            isEditing={!!editingDraftId}
             refetch={refetch}
           />
         </div>
       </main>
 
-      {/* ================= Confirm Modal ================= */}
+      {/* Confirm Modal */}
       {confirmModal.open && (
         <PublishConfirmModal
           message={confirmModal.message}

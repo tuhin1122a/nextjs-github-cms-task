@@ -10,6 +10,7 @@ export function LocalDraftsList({
   onDelete,
   onPublish,
   isPublishing,
+  isEditing, // <-- pass this from parent (PublisherClient)
 }) {
   const colors = [
     "bg-slate-100 border-slate-300",
@@ -18,6 +19,7 @@ export function LocalDraftsList({
     "bg-amber-100 border-amber-300",
     "bg-violet-100 border-violet-300",
   ];
+
   const getRandomColor = () =>
     colors[Math.floor(Math.random() * colors.length)];
 
@@ -32,7 +34,16 @@ export function LocalDraftsList({
   };
 
   const handleDeleteClick = (id) => {
+    if (isEditing) return; // disable delete while editing
     onDelete(id);
+  };
+
+  const handleEditClick = (id) => {
+    if (!isEditing) {
+      onEdit(id);
+    } else {
+      toast.info("Finish editing the current draft first!");
+    }
   };
 
   return (
@@ -91,8 +102,13 @@ export function LocalDraftsList({
                   <Button
                     variant="outline"
                     size="icon"
-                    onClick={() => onEdit(d.id)}
-                    className="h-8 w-8 border-slate-300 hover:bg-slate-50"
+                    onClick={() => handleEditClick(d.id)}
+                    disabled={isEditing} // lock edit while another draft is editing
+                    className={`h-8 w-8 border-slate-300 ${
+                      isEditing
+                        ? "bg-gray-200 cursor-not-allowed hover:bg-gray-200"
+                        : "hover:bg-slate-50"
+                    }`}
                   >
                     <Edit className="h-4 w-4" />
                   </Button>
@@ -100,7 +116,10 @@ export function LocalDraftsList({
                     variant="destructive"
                     size="icon"
                     onClick={() => handleDeleteClick(d.id)}
-                    className="h-8 w-8"
+                    disabled={isEditing} // lock delete while editing
+                    className={`h-8 w-8 ${
+                      isEditing ? "bg-gray-200 cursor-not-allowed" : ""
+                    }`}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -113,8 +132,12 @@ export function LocalDraftsList({
         {drafts.length > 0 && (
           <Button
             onClick={onPublish}
-            disabled={isPublishing}
-            className="w-full mt-4 bg-emerald-600 hover:bg-emerald-700"
+            disabled={isPublishing || isEditing} // disable publish while editing
+            className={`w-full mt-4 ${
+              isPublishing || isEditing
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-emerald-600 hover:bg-emerald-700"
+            }`}
             size="lg"
           >
             {isPublishing

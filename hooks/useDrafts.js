@@ -1,55 +1,91 @@
 "use client";
 
+import { nanoid } from "nanoid";
 import { useEffect, useState } from "react";
 
 const LOCAL_STORAGE_KEY = "markdown_drafts";
 
 export function useDrafts() {
-  const [drafts, setDrafts] = useState([]);
-
-  // Load drafts from localStorage on mount
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored).map((d) => ({
-          ...d,
-          createdAt: new Date(d.createdAt),
-        }));
-        setDrafts(parsed);
+  // ------------------------
+  // Initialize state from localStorage (SSR-safe)
+  // ------------------------
+  const [drafts, setDrafts] = useState(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (stored) {
+          return JSON.parse(stored).map((d) => ({
+            ...d,
+            createdAt: new Date(d.createdAt), // Restore Date object
+          }));
+        }
+      } catch (err) {
+        console.error("Error parsing drafts from localStorage", err);
       }
-    } catch (err) {
-      console.error("Error parsing drafts from localStorage", err);
     }
-  }, []);
+    return [];
+  });
 
-  // Save drafts to localStorage whenever they change
+  // ------------------------
+  // Persist drafts to localStorage whenever they change
+  // ------------------------
   useEffect(() => {
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(drafts));
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem(
+          LOCAL_STORAGE_KEY,
+          JSON.stringify(
+            drafts.map((d) => ({ ...d, createdAt: d.createdAt.toISOString() }))
+          )
+        );
+      } catch (err) {
+        console.error("Error saving drafts to localStorage", err);
+      }
+    }
   }, [drafts]);
 
+  // ------------------------
+  // Add a new draft (new drafts appear at the top)
+  // ------------------------
   const addDraft = (title, body) => {
     if (!title.trim() || !body.trim()) return;
+
     const newDraft = {
-      id: Date.now().toString(),
+      id: nanoid(),
       title,
       body,
       createdAt: new Date(),
     };
-    setDrafts((prev) => [...prev, newDraft]);
+
+    setDrafts((prev) => [newDraft, ...prev]);
   };
 
+  // ------------------------
+  // Update an existing draft
+  // ------------------------
   const updateDraft = (id, title, body) => {
     setDrafts((prev) =>
       prev.map((d) => (d.id === id ? { ...d, title, body } : d))
     );
   };
 
+  // ------------------------
+  // Delete a draft by ID
+  // ------------------------
   const deleteDraft = (id) => {
     setDrafts((prev) => prev.filter((d) => d.id !== id));
   };
 
+  // ------------------------
+  // Clear all drafts
+  // ------------------------
   const clearAllDrafts = () => setDrafts([]);
 
-  return { drafts, addDraft, updateDraft, deleteDraft, clearAllDrafts };
+  return {
+    drafts,
+    addDraft,
+    updateDraft,
+    deleteDraft,
+    clearAllDrafts,
+  };
 }

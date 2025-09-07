@@ -7,7 +7,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
-import { toast } from "sonner"; // <-- import toast
 
 export function DraftForm({ editingDraft, onAdd, onUpdate, onCancelEdit }) {
   const [title, setTitle] = useState("");
@@ -16,6 +15,7 @@ export function DraftForm({ editingDraft, onAdd, onUpdate, onCancelEdit }) {
 
   const isEditing = !!editingDraft;
 
+  // Populate or reset form
   useEffect(() => {
     if (editingDraft) {
       setTitle(editingDraft.title);
@@ -27,25 +27,31 @@ export function DraftForm({ editingDraft, onAdd, onUpdate, onCancelEdit }) {
     setError("");
   }, [editingDraft]);
 
+  const resetForm = () => {
+    setTitle("");
+    setBody("");
+    setError("");
+  };
+
   const handleSubmit = (e) => {
     e?.preventDefault();
-
     if (!title.trim() || !body.trim()) {
       setError("Both Title and Body are required");
       return;
     }
 
-    if (isEditing && editingDraft) {
+    if (isEditing) {
       onUpdate(editingDraft.id, title.trim(), body.trim());
-      toast.success("Draft updated successfully!"); // <-- toast on update
     } else {
       onAdd(title.trim(), body.trim());
-      toast.success("Draft created successfully!"); // <-- toast on create
     }
 
-    setTitle("");
-    setBody("");
-    setError("");
+    resetForm();
+  };
+
+  const handleCancel = () => {
+    resetForm();
+    onCancelEdit?.();
   };
 
   const inputStyle =
@@ -70,12 +76,6 @@ export function DraftForm({ editingDraft, onAdd, onUpdate, onCancelEdit }) {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className={inputStyle}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  handleSubmit();
-                }
-              }}
             />
           </div>
 
@@ -88,12 +88,6 @@ export function DraftForm({ editingDraft, onAdd, onUpdate, onCancelEdit }) {
               value={body}
               onChange={(e) => setBody(e.target.value)}
               className={`min-h-[120px] resize-none ${inputStyle}`}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  handleSubmit();
-                }
-              }}
             />
           </div>
 
@@ -102,7 +96,7 @@ export function DraftForm({ editingDraft, onAdd, onUpdate, onCancelEdit }) {
           <Button
             type="submit"
             className="w-full gap-2 bg-emerald-600 hover:bg-emerald-700"
-            disabled={!title && !body}
+            disabled={!title.trim() || !body.trim()}
           >
             <Plus className="h-4 w-4" />
             {isEditing ? "Update Draft" : "Add Draft"}
@@ -112,7 +106,7 @@ export function DraftForm({ editingDraft, onAdd, onUpdate, onCancelEdit }) {
             <Button
               type="button"
               variant="outline"
-              onClick={onCancelEdit}
+              onClick={handleCancel}
               className="w-full border-slate-300 hover:bg-slate-50 bg-transparent"
             >
               Cancel Edit

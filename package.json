@@ -19,6 +19,7 @@
     "framer-motion": "^12.23.12",
     "lucide-react": "^0.542.0",
     "marked": "^16.2.1",
+    "nanoid": "^5.1.5",
     "next": "14.2.18",
     "prismjs": "^1.30.0",
     "react": "^18",
