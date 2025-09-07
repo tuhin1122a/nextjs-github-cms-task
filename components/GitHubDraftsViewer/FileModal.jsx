@@ -9,10 +9,10 @@ import {
 import { marked } from "marked";
 import Prism from "prismjs";
 import "prismjs/components/prism-css";
-import "prismjs/components/prism-html";
 import "prismjs/components/prism-javascript";
 import "prismjs/components/prism-json";
-import "prismjs/themes/prism.css"; // Light GitHub-style theme
+import "prismjs/components/prism-markup"; // ✅ HTML/XML এর জন্য সঠিক
+import "prismjs/themes/prism.css"; // GitHub-style light theme
 import { useEffect } from "react";
 
 export function FileModal({ file, isOpen, onClose }) {
@@ -22,11 +22,13 @@ export function FileModal({ file, isOpen, onClose }) {
 
   const renderer = new marked.Renderer();
 
-  // Code block rendering with Prism highlighting
+  // Custom code renderer with Prism highlighting
   renderer.code = (code, language) => {
-    const validLang = Prism.languages[language] || Prism.languages.markup;
-    const highlighted = Prism.highlight(code, validLang, language);
-    return `<pre class="rounded-md bg-gray-100 p-4 overflow-x-auto"><code class="language-${language}">${highlighted}</code></pre>`;
+    const lang = language && Prism.languages[language] ? language : "markup"; // fallback to markup
+    const highlighted = Prism.highlight(code, Prism.languages[lang], lang);
+    return `<pre class="rounded-md bg-gray-100 p-4 overflow-x-auto">
+              <code class="language-${lang}">${highlighted}</code>
+            </pre>`;
   };
 
   const htmlContent = file?.content
@@ -49,7 +51,6 @@ export function FileModal({ file, isOpen, onClose }) {
                        prose-p:text-gray-800
                        prose-strong:text-gray-900
                        prose-code:text-gray-800
-                       prose-pre:text-gray-800
                        prose-pre:bg-gray-100
                        overflow-x-auto"
             dangerouslySetInnerHTML={{ __html: htmlContent }}
