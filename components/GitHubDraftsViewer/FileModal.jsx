@@ -67,8 +67,9 @@ export function FileModal({ file, isOpen, onClose }) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-auto bg-white border border-gray-300">
-        <DialogHeader className="border-b border-gray-300 pb-4">
+      <DialogContent className="max-w-4xl max-h-[80vh] bg-white border border-gray-300 flex flex-col">
+        {/* Fixed Header */}
+        <DialogHeader className="border-b border-gray-300 pb-4 flex-shrink-0">
           <DialogTitle className="text-xl font-semibold text-gray-900">
             {file?.name || "File Content"}
           </DialogTitle>
@@ -77,15 +78,16 @@ export function FileModal({ file, isOpen, onClose }) {
           </DialogDescription>
         </DialogHeader>
 
+        {/* Scrollable Content */}
         <div
           ref={contentRef}
-          className="mt-6 p-4 bg-white rounded-lg border border-gray-300 prose max-w-none
+          className="mt-4 p-4 bg-white rounded-lg border border-gray-300 prose max-w-none
                      prose-headings:text-gray-900
                      prose-p:text-gray-800
                      prose-strong:text-gray-900
                      prose-code:text-pink-600
                      prose-pre:bg-gray-100
-                     overflow-x-auto"
+                     overflow-auto flex-1"
           dangerouslySetInnerHTML={{ __html: htmlContent }}
         />
       </DialogContent>
