@@ -6,6 +6,11 @@ import { DraftCard } from "../GitHubDraftsViewer/DraftCard";
 import { FileModal } from "../GitHubDraftsViewer/FileModal";
 import { Loader } from "../GitHubDraftsViewer/Loader";
 
+/**
+ * GitHubDraftsViewer Component
+ * - Displays a list of Markdown files fetched from GitHub
+ * - Supports viewing, dragging, and dropping drafts for publishing
+ */
 export function GitHubDraftsViewer({
   files = [],
   loading = false,
@@ -16,6 +21,7 @@ export function GitHubDraftsViewer({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
 
+  // Color palette for draft cards
   const colors = [
     "bg-slate-100 border-slate-300",
     "bg-emerald-100 border-emerald-300",
@@ -27,11 +33,17 @@ export function GitHubDraftsViewer({
   const getRandomColor = () =>
     colors[Math.floor(Math.random() * colors.length)];
 
+  /**
+   * Opens file modal to view markdown content
+   */
   const handleViewFile = (file) => {
     setSelectedFile(file);
     setIsModalOpen(true);
   };
 
+  /**
+   * Drag-and-drop handlers
+   */
   const handleDragOver = (e) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
@@ -56,7 +68,7 @@ export function GitHubDraftsViewer({
     }
   };
 
-  // ✅ সব ফাইল দেখানোর জন্য
+  // Ensure files array is always iterable
   const displayedFiles = Array.isArray(files) ? files : [];
 
   return (
@@ -74,11 +86,11 @@ export function GitHubDraftsViewer({
       <CardHeader className="flex flex-row justify-between items-center pb-4">
         <div>
           <CardTitle className="text-xl font-semibold text-slate-800">
-            GitHub Drafts ({Array.isArray(files) ? files.length : 0} total)
+            GitHub Drafts ({displayedFiles.length} total)
           </CardTitle>
           <p className="text-sm text-slate-600 mt-1">
             {isDragOver
-              ? "Drop draft here to publish!"
+              ? "Release to publish draft"
               : "Drop zone for publishing drafts"}
           </p>
         </div>
@@ -102,7 +114,7 @@ export function GitHubDraftsViewer({
           </div>
         )}
 
-        {/* Loader / Files */}
+        {/* Loader or Files */}
         {loading ? (
           <Loader />
         ) : !displayedFiles.length ? (

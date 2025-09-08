@@ -6,6 +6,11 @@ import { Edit, Eye, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { FileModal } from "../GitHubDraftsViewer/FileModal";
 
+/**
+ * LocalDraftsList Component
+ * - Displays local drafts with drag-and-drop support
+ * - Supports viewing, editing, deleting, and publishing drafts
+ */
 export function LocalDraftsList({
   drafts,
   onEdit,
@@ -17,6 +22,7 @@ export function LocalDraftsList({
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
 
+  // Color palette for draft cards
   const colors = [
     "bg-slate-100 border-slate-300",
     "bg-emerald-100 border-emerald-300",
@@ -28,16 +34,19 @@ export function LocalDraftsList({
   const getRandomColor = () =>
     colors[Math.floor(Math.random() * colors.length)];
 
+  // Open file modal
   const openModal = (file) => {
     setSelectedFile(file);
     setModalOpen(true);
   };
 
+  // Close file modal
   const closeModal = () => {
     setSelectedFile(null);
     setModalOpen(false);
   };
 
+  // Drag-and-drop handlers
   const handleDragStart = (e, draft) => {
     e.dataTransfer.setData("application/json", JSON.stringify(draft));
     e.dataTransfer.effectAllowed = "move";
@@ -48,6 +57,7 @@ export function LocalDraftsList({
     e.target.style.opacity = "1";
   };
 
+  // Edit and delete handlers
   const handleDeleteClick = (id) => {
     if (isEditing) return;
     onDelete(id);
@@ -64,6 +74,7 @@ export function LocalDraftsList({
   return (
     <>
       <Card className="shadow-sm border border-slate-200">
+        {/* Header */}
         <CardHeader>
           <CardTitle className="text-slate-800">
             Local Drafts ({drafts.length})
@@ -72,6 +83,8 @@ export function LocalDraftsList({
             Drag drafts to the left panel to publish
           </p>
         </CardHeader>
+
+        {/* Draft list */}
         <CardContent className="space-y-3">
           <div className="space-y-3 max-h-[400px] overflow-auto pr-2">
             {drafts.length === 0 ? (
@@ -85,6 +98,7 @@ export function LocalDraftsList({
                   onDragEnd={handleDragEnd}
                   className={`rounded-lg p-4 flex justify-between items-start gap-2 shadow-sm cursor-move transition-opacity ${getRandomColor()}`}
                 >
+                  {/* Draft content */}
                   <div className="flex items-start gap-3 flex-1 min-w-0">
                     <div className="mt-1 text-slate-400">
                       <svg
@@ -93,15 +107,11 @@ export function LocalDraftsList({
                         viewBox="0 0 12 12"
                         fill="currentColor"
                       >
-                        <circle cx="2" cy="2" r="1" />
-                        <circle cx="6" cy="2" r="1" />
-                        <circle cx="10" cy="2" r="1" />
-                        <circle cx="2" cy="6" r="1" />
-                        <circle cx="6" cy="6" r="1" />
-                        <circle cx="10" cy="6" r="1" />
-                        <circle cx="2" cy="10" r="1" />
-                        <circle cx="6" cy="10" r="1" />
-                        <circle cx="10" cy="10" r="1" />
+                        {[2, 6, 10].flatMap((cx) =>
+                          [2, 6, 10].map((cy) => (
+                            <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r="1" />
+                          ))
+                        )}
                       </svg>
                     </div>
                     <div className="flex-1 min-w-0">
@@ -114,8 +124,9 @@ export function LocalDraftsList({
                       </p>
                     </div>
                   </div>
+
+                  {/* Action buttons */}
                   <div className="flex gap-2">
-                    {/* Eye Button */}
                     <Button
                       variant="ghost"
                       size="sm"
@@ -125,7 +136,6 @@ export function LocalDraftsList({
                       <Eye className="h-4 w-4 text-slate-600" />
                     </Button>
 
-                    {/* Edit Button */}
                     <Button
                       variant="outline"
                       size="icon"
@@ -140,7 +150,6 @@ export function LocalDraftsList({
                       <Edit className="h-4 w-4 text-slate-600" />
                     </Button>
 
-                    {/* Delete Button */}
                     <Button
                       variant="outline"
                       size="icon"
@@ -156,6 +165,7 @@ export function LocalDraftsList({
             )}
           </div>
 
+          {/* Publish All button */}
           {drafts.length > 0 && (
             <Button
               onClick={onPublish}

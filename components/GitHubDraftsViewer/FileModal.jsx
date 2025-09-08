@@ -13,15 +13,29 @@ import "prismjs/components/prism-css";
 import "prismjs/components/prism-javascript";
 import "prismjs/components/prism-json";
 import "prismjs/components/prism-markup"; // HTML
-import "prismjs/themes/prism.css"; // Light GitHub-style theme
+import "prismjs/themes/prism.css"; // GitHub-style light theme
 import { useEffect, useRef } from "react";
 
+/**
+ * FileModal component
+ * ------------------
+ * Displays a preview of a markdown file (from GitHub or local draft) in a modal dialog.
+ * Highlights code blocks using Prism.js.
+ *
+ * Props:
+ * - file: The draft or GitHub file to display (contains content or body and name/title)
+ * - isOpen: Boolean to control modal visibility
+ * - onClose: Callback function when modal is closed
+ */
 export function FileModal({ file, isOpen, onClose }) {
   const contentRef = useRef(null);
 
-  // Pick content intelligently: GitHub files have 'content', local drafts have 'body'
+  // Select content intelligently: GitHub files have 'content', local drafts have 'body'
   const markdownContent = file?.content ?? file?.body ?? "";
 
+  /**
+   * Highlights all code blocks inside the modal whenever the markdown content changes
+   */
   useEffect(() => {
     if (contentRef.current) {
       const codeBlocks = contentRef.current.querySelectorAll("pre code");
@@ -29,23 +43,25 @@ export function FileModal({ file, isOpen, onClose }) {
     }
   }, [markdownContent]);
 
+  /**
+   * Custom renderer for marked to handle code blocks
+   * Ensures proper syntax highlighting and fallback for unknown code formats
+   */
   const renderer = new marked.Renderer();
 
   renderer.code = (code, language) => {
     let codeString = "";
 
+    // Handle objects and unknown formats gracefully
     if (typeof code === "object" && code !== null) {
-      if ("text" in code) {
-        codeString = code.text;
-      } else if ("raw" in code) {
-        codeString = code.raw;
-      } else {
-        codeString = JSON.stringify(code, null, 2);
-      }
+      if ("text" in code) codeString = code.text;
+      else if ("raw" in code) codeString = code.raw;
+      else codeString = JSON.stringify(code, null, 2);
     } else {
       codeString = String(code || "");
     }
 
+    // Determine language for Prism highlighting, default to 'markup'
     const lang =
       typeof language === "string" && Prism.languages[language]
         ? language
@@ -62,6 +78,7 @@ export function FileModal({ file, isOpen, onClose }) {
             </pre>`;
   };
 
+  // Render markdown or show placeholder if empty
   const htmlContent =
     markdownContent.length > 0
       ? marked(markdownContent, { renderer })
@@ -70,7 +87,7 @@ export function FileModal({ file, isOpen, onClose }) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[80vh] bg-white border border-gray-300 flex flex-col">
-        {/* Header */}
+        {/* Modal Header */}
         <DialogHeader className="border-b border-gray-300 pb-4 flex-shrink-0">
           <DialogTitle className="text-xl font-semibold text-gray-900">
             {file?.name || file?.title || "File Content"}
@@ -78,7 +95,7 @@ export function FileModal({ file, isOpen, onClose }) {
           <DialogDescription>Preview of your markdown file</DialogDescription>
         </DialogHeader>
 
-        {/* Scrollable Content */}
+        {/* Scrollable Markdown Content */}
         <div
           ref={contentRef}
           className="mt-4 p-4 bg-white rounded-lg border border-gray-300 prose max-w-none

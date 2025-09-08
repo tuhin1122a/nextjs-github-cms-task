@@ -1,18 +1,21 @@
 import { Octokit } from "@octokit/core";
 import { NextResponse } from "next/server";
 
-// GitHub configuration from environment variables
-const OWNER = process.env.NEXT_PUBLIC_GITHUB_OWNER;
-const REPO = process.env.NEXT_PUBLIC_GITHUB_REPO;
-const BRANCH = process.env.NEXT_PUBLIC_GITHUB_BRANCH;
+// -------------------------
+// GitHub Configuration
+// -------------------------
+const OWNER = process.env.NEXT_PUBLIC_GITHUB_OWNER; // Repository owner
+const REPO = process.env.NEXT_PUBLIC_GITHUB_REPO; // Repository name
+const BRANCH = process.env.NEXT_PUBLIC_GITHUB_BRANCH; // Branch to commit to
 const COMMITTER = {
-  name: process.env.GITHUB_COMMITTER_NAME,
-  email: process.env.GITHUB_COMMITTER_EMAIL,
+  name: process.env.GITHUB_COMMITTER_NAME, // Commit author name
+  email: process.env.GITHUB_COMMITTER_EMAIL, // Commit author email
 };
-const DRAFTS_PATH = process.env.NEXT_PUBLIC_DRAFTS_PATH;
+const DRAFTS_PATH = process.env.NEXT_PUBLIC_DRAFTS_PATH; // Path to drafts folder
 
 /**
  * Ensures that the drafts folder exists in the repository.
+ * Creates a `.gitkeep` file if the folder does not exist.
  */
 async function ensureFolder(octokit) {
   try {
@@ -22,6 +25,7 @@ async function ensureFolder(octokit) {
     );
   } catch (err) {
     if (err.status === 404) {
+      // Folder does not exist, create it using a .gitkeep file
       await octokit.request("PUT /repos/{owner}/{repo}/contents/{path}", {
         owner: OWNER,
         repo: REPO,
@@ -38,7 +42,8 @@ async function ensureFolder(octokit) {
 }
 
 /**
- * Retrieves the SHA of a file in the repository if it exists.
+ * Retrieves the SHA of a file in the repository.
+ * Returns `undefined` if the file does not exist.
  */
 async function getFileSha(octokit, path) {
   try {
@@ -48,17 +53,20 @@ async function getFileSha(octokit, path) {
     );
     return data.sha;
   } catch (err) {
-    if (err.status === 404) return undefined;
-    throw err;
+    if (err.status === 404) return undefined; // File does not exist
+    throw err; // Propagate other errors
   }
 }
 
 /**
- * Handles POST requests to publish a single draft.
+ * POST handler to publish a single draft to GitHub.
+ * Accepts draft data with `title` and `body` fields in the request body.
  */
 export async function POST(req) {
   try {
     const draft = await req.json();
+
+    // Validate draft data
     if (!draft?.title?.trim()) {
       return NextResponse.json(
         { error: "Invalid draft data" },
@@ -66,6 +74,7 @@ export async function POST(req) {
       );
     }
 
+    // Ensure GitHub token is available
     const token = process.env.GITHUB_TOKEN;
     if (!token) {
       return NextResponse.json(
@@ -76,16 +85,22 @@ export async function POST(req) {
 
     const octokit = new Octokit({ auth: token });
 
+    // Ensure drafts folder exists
     await ensureFolder(octokit);
 
+    // Sanitize title to create a safe file name
     const safeTitle = draft.title.replace(/[^a-zA-Z0-9-_]/g, "_");
     const path = `${DRAFTS_PATH}/${safeTitle}.md`;
+
+    // Encode draft content in Base64 for GitHub API
     const content = Buffer.from(`# ${draft.title}\n\n${draft.body}`).toString(
       "base64"
     );
 
+    // Check if file already exists to determine whether to create or update
     const sha = await getFileSha(octokit, path);
 
+    // Commit draft to GitHub
     const res = await octokit.request(
       "PUT /repos/{owner}/{repo}/contents/{path}",
       {
@@ -98,7 +113,7 @@ export async function POST(req) {
         committer: COMMITTER,
         content,
         branch: BRANCH,
-        ...(sha && { sha }),
+        ...(sha && { sha }), // Include SHA if updating an existing file
       }
     );
 

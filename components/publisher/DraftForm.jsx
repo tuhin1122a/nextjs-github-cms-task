@@ -8,6 +8,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 
+/**
+ * DraftForm Component
+ * - Handles creation and editing of drafts
+ * - Validates input and manages local form state
+ */
 export function DraftForm({ editingDraft, onAdd, onUpdate, onCancelEdit }) {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
@@ -15,7 +20,7 @@ export function DraftForm({ editingDraft, onAdd, onUpdate, onCancelEdit }) {
 
   const isEditing = !!editingDraft;
 
-  // Populate or reset form
+  // Populate form when editing a draft, reset when not editing
   useEffect(() => {
     if (editingDraft) {
       setTitle(editingDraft.title);
@@ -35,6 +40,8 @@ export function DraftForm({ editingDraft, onAdd, onUpdate, onCancelEdit }) {
 
   const handleSubmit = (e) => {
     e?.preventDefault();
+
+    // Validation
     if (!title.trim() || !body.trim()) {
       setError("Both Title and Body are required");
       return;
@@ -55,7 +62,7 @@ export function DraftForm({ editingDraft, onAdd, onUpdate, onCancelEdit }) {
   };
 
   const inputStyle =
-    "bg-white border border-slate-300 text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200";
+    "bg-white border border-slate-300 text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 rounded-md";
 
   return (
     <Card className="shadow-sm border border-slate-200">
@@ -67,6 +74,7 @@ export function DraftForm({ editingDraft, onAdd, onUpdate, onCancelEdit }) {
 
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
+          {/* Title Field */}
           <div className="space-y-2">
             <Label htmlFor="title" className="text-slate-700">
               Title
@@ -75,10 +83,14 @@ export function DraftForm({ editingDraft, onAdd, onUpdate, onCancelEdit }) {
               id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
+              placeholder="Enter draft title"
               className={inputStyle}
+              autoFocus={isEditing} // focus when editing
+              required
             />
           </div>
 
+          {/* Body Field */}
           <div className="space-y-2">
             <Label htmlFor="body" className="text-slate-700">
               Body
@@ -87,27 +99,32 @@ export function DraftForm({ editingDraft, onAdd, onUpdate, onCancelEdit }) {
               id="body"
               value={body}
               onChange={(e) => setBody(e.target.value)}
+              placeholder="Enter draft content"
               className={`min-h-[120px] resize-none ${inputStyle}`}
+              required
             />
           </div>
 
+          {/* Error Message */}
           {error && <p className="text-red-600 text-sm">{error}</p>}
 
+          {/* Submit Button */}
           <Button
             type="submit"
-            className="w-full gap-2 bg-emerald-600 hover:bg-emerald-700"
+            className="w-full gap-2 bg-emerald-600 hover:bg-emerald-700 focus:ring-2 focus:ring-emerald-300 focus:outline-none"
             disabled={!title.trim() || !body.trim()}
           >
             <Plus className="h-4 w-4" />
             {isEditing ? "Update Draft" : "Add Draft"}
           </Button>
 
+          {/* Cancel Edit Button */}
           {isEditing && (
             <Button
               type="button"
               variant="outline"
               onClick={handleCancel}
-              className="w-full border-slate-300 hover:bg-slate-50 bg-transparent"
+              className="w-full border-slate-300 hover:bg-slate-50 bg-transparent focus:ring-2 focus:ring-emerald-300 focus:outline-none"
             >
               Cancel Edit
             </Button>
