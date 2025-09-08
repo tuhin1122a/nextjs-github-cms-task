@@ -18,20 +18,23 @@ import { useEffect, useRef } from "react";
 
 export function FileModal({ file, isOpen, onClose }) {
   const contentRef = useRef(null);
+  console.log("File in Modal:", file);
+
+  // Pick content intelligently: GitHub files have 'content', local drafts have 'body'
+  const markdownContent = file?.content ?? file?.body ?? "";
 
   useEffect(() => {
     if (contentRef.current) {
       const codeBlocks = contentRef.current.querySelectorAll("pre code");
       codeBlocks.forEach((block) => Prism.highlightElement(block));
     }
-  }, [file]);
+  }, [markdownContent]);
 
   const renderer = new marked.Renderer();
 
   renderer.code = (code, language) => {
     let codeString = "";
 
-    // Handle object (from parsed Markdown AST)
     if (typeof code === "object" && code !== null) {
       if ("text" in code) {
         codeString = code.text;
@@ -41,7 +44,6 @@ export function FileModal({ file, isOpen, onClose }) {
         codeString = JSON.stringify(code, null, 2);
       }
     } else {
-      // Handle string normally
       codeString = String(code || "");
     }
 
@@ -61,21 +63,20 @@ export function FileModal({ file, isOpen, onClose }) {
             </pre>`;
   };
 
-  const htmlContent = file?.content
-    ? marked(file.content, { renderer })
-    : "<em class='text-gray-500'>No content available</em>";
+  const htmlContent =
+    markdownContent.length > 0
+      ? marked(markdownContent, { renderer })
+      : "<em class='text-gray-500'>No content available</em>";
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[80vh] bg-white border border-gray-300 flex flex-col">
-        {/* Fixed Header */}
+        {/* Header */}
         <DialogHeader className="border-b border-gray-300 pb-4 flex-shrink-0">
           <DialogTitle className="text-xl font-semibold text-gray-900">
-            {file?.name || "File Content"}
+            {file?.name || file?.title || "File Content"}
           </DialogTitle>
-          <DialogDescription>
-            Preview of your markdown file from GitHub
-          </DialogDescription>
+          <DialogDescription>Preview of your markdown file</DialogDescription>
         </DialogHeader>
 
         {/* Scrollable Content */}

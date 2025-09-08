@@ -28,18 +28,17 @@ export async function GET() {
     });
 
     if (!res.ok) {
-      const errBody = await res.json();
+      const errBody = await res.json().catch(() => ({}));
       return NextResponse.json(
-        {
-          error: errBody?.message || "Failed to fetch from GitHub",
-        },
+        { error: errBody?.message || "Failed to fetch from GitHub" },
         { status: res.status }
       );
     }
 
     const files = await res.json();
 
-    const filesWithContent = await Promise.all(
+    // Fetch the content of markdown files only
+    const markdownFiles = await Promise.all(
       files
         .filter((f) => f.name.endsWith(".md"))
         .map(async (file) => {
@@ -53,7 +52,7 @@ export async function GET() {
         })
     );
 
-    return NextResponse.json({ files: filesWithContent });
+    return NextResponse.json({ success: true, data: markdownFiles });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json({ error: message }, { status: 500 });

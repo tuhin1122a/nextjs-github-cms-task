@@ -15,6 +15,7 @@ export function GitHubDraftsViewer({
   const [selectedFile, setSelectedFile] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
+
   const colors = [
     "bg-slate-100 border-slate-300",
     "bg-emerald-100 border-emerald-300",
@@ -55,11 +56,8 @@ export function GitHubDraftsViewer({
     }
   };
 
-  // Display all files except the last one
-  const displayedFiles =
-    Array.isArray(files) && files.length > 1
-      ? files.slice(0, files.length - 1)
-      : [];
+  // ✅ সব ফাইল দেখানোর জন্য
+  const displayedFiles = Array.isArray(files) ? files : [];
 
   return (
     <Card
@@ -104,7 +102,7 @@ export function GitHubDraftsViewer({
           </div>
         )}
 
-        {/* Loader */}
+        {/* Loader / Files */}
         {loading ? (
           <Loader />
         ) : !displayedFiles.length ? (

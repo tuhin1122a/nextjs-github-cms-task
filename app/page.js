@@ -1,9 +1,9 @@
 import { PublisherClient } from "@/components/publisher/PublisherClient";
-import { fetchMarkdownFilesFromGitHub } from "@/lib/api";
+import { fetchMarkdownDrafts } from "@/lib/api";
 import { FileText } from "lucide-react";
 
 export default async function MarkdownPublisherPage() {
-  const initialFiles = await fetchMarkdownFilesFromGitHub("drafts");
+  const initialFiles = await fetchMarkdownDrafts();
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
@@ -15,7 +15,7 @@ export default async function MarkdownPublisherPage() {
       </header>
 
       <main className="container mx-auto px-4 py-6">
-        <PublisherClient initialFiles={initialFiles} />
+        <PublisherClient initialFiles={initialFiles.data} />
       </main>
     </div>
   );
