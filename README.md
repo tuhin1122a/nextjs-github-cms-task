@@ -154,6 +154,8 @@ GITHUB_COMMITTER_EMAIL=
 
 # Drafts Directory
 NEXT_PUBLIC_DRAFTS_PATH=
+#Base URL
+NEXT_PUBLIC_BASE_URL=
 ```
 
 ### 3. GitHub Personal Access Token
