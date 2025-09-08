@@ -18,7 +18,6 @@ import { useEffect, useRef } from "react";
 
 export function FileModal({ file, isOpen, onClose }) {
   const contentRef = useRef(null);
-  console.log("File in Modal:", file);
 
   // Pick content intelligently: GitHub files have 'content', local drafts have 'body'
   const markdownContent = file?.content ?? file?.body ?? "";
