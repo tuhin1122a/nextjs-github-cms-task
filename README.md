@@ -422,19 +422,19 @@ Publish multiple drafts to GitHub at once (bulk publish).
 
 ## Challenges & Solutions
 
-| Challenge                           | Solution                                                      |
-| ----------------------------------- | ------------------------------------------------------------- |
-| Securely committing files to GitHub | Server-side environment variables ব্যবহার করা হয়েছে           |
-| Persisting drafts                   | `localStorage` + JSON serialization ব্যবহার করা হয়েছে         |
-| Rendering Markdown safely           | `marked` + `sanitize-html` ব্যবহার করে XSS প্রতিরোধ করা হয়েছে |
-| Responsive UI                       | Tailwind CSS + utilities, multiple devices-এ test করা হয়েছে   |
+| Challenge                           | Solution                                                       |
+| ----------------------------------- | -------------------------------------------------------------- |
+| Securely committing files to GitHub | Server-side environment variables ব্যবহার করা হয়েছে           |
+| Persisting drafts                   | `localStorage` + JSON serialization ব্যবহার করা হয়েছে         |
+| Rendering Markdown safely           | `marked` + `sanitize-html` ব্যবহার করে XSS প্রতিরোধ করা হয়েছে |
+| Responsive UI                       | Tailwind CSS + utilities, multiple devices-এ test করা হয়েছে   |
 
 ---
 
 ## Conclusion
 
 - Assignment requirements সফলভাবে implement করা হয়েছে
-- GitHub API integration javaScript + Next.js patterns, এবং UI design best practices শেখা হয়েছে
+- GitHub API integration, JavaScript + Next.js patterns, এবং UI design best practices শেখা হয়েছে
 
 ### Future Improvements
 
